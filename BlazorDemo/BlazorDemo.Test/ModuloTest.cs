@@ -67,7 +67,6 @@ public sealed class ModuloTest : TestContext
     [InlineData(double.MaxValue * -1, double.MaxValue * -1)]
     public void RealNumbersModuloRealNumbersExceptZero_GivesCorrectResult(double a, double b)
     {
-        var x = a % b;
         // Act
         _inputNum1.Change(a.ToString(CultureInfo.CurrentCulture));
         _inputNum2.Change(b.ToString(CultureInfo.CurrentCulture));
@@ -82,6 +81,8 @@ public sealed class ModuloTest : TestContext
     [InlineData(-1)]
     [InlineData(1)]
     [InlineData(1.5)]
+    [InlineData(double.MaxValue)]
+    [InlineData(double.MaxValue * -1)]
     public void SignedZeroModuloRealNumbersExceptZero_GivesZero(double a)
     {
         // Act
@@ -91,7 +92,7 @@ public sealed class ModuloTest : TestContext
 
         // Assert
         string actual = _result.GetAttribute("value");
-        Assert.Equal("0", actual);
+        Assert.Equal("0", Math.Abs(double.Parse(actual)).ToString(CultureInfo.CurrentCulture));
 
         // "-0" can be entered into first box so we need to test for it.
         // Act
@@ -100,29 +101,32 @@ public sealed class ModuloTest : TestContext
 
         // Assert
         actual = _result.GetAttribute("value");
-        Assert.Equal("0", actual);
+        Assert.Equal("0", Math.Abs(double.Parse(actual)).ToString(CultureInfo.CurrentCulture));
     }
     
-    [Fact]
-    public void RaisingSignedZeroToNegativeMaxDouble_GivesError()
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(1)]
+    [InlineData(-1.5)]
+    [InlineData(1.5)]
+    [InlineData(double.MaxValue)]
+    [InlineData(double.MaxValue * -1)]
+    public void RealNumbersModuloSignedZero_GivesError(double a)
     {
         // Act
-        _inputNum1.Change("0");
-        _inputNum2.Change((double.MaxValue * -1).ToString(CultureInfo.CurrentCulture));
+        _inputNum1.Change(a.ToString(CultureInfo.CurrentCulture));
+        _inputNum2.Change("0");
         _addButton.Click();
-
-        // Assert
-        string actual = _result.GetAttribute("value");
-        Assert.Equal("Cannot raise zero to negative exponent", actual);
         
-        // "-0" can be entered into first box so we need to test for it.
-        // Act
-        _inputNum1.Change("-0");
-        _addButton.Click();
-
         // Assert
-        actual = _result.GetAttribute("value");
-        Assert.Equal("Cannot raise zero to negative exponent", actual);
+        Assert.Equal("Cannot Divide by Zero", _result.GetAttribute("value"));
+        
+        // Act
+        _inputNum2.Change("-0");
+        _addButton.Click();
+        
+        // Assert
+        Assert.Equal("Cannot Divide by Zero", _result.GetAttribute("value"));
     }
     
     [Theory]
@@ -130,76 +134,15 @@ public sealed class ModuloTest : TestContext
     [InlineData("0", "-0")]
     [InlineData("-0", "0")]
     [InlineData("-0", "-0")]
-    public void RaisingSignedZeroToSignedZero_GivesOne(string a, string b)
+    public void SignedZeroModuloSignedZero_GivesError(string a, string b)
     {
-        // "-0" can be entered into either box so we need to test for it.
-
         // Act
         _inputNum1.Change(a);
         _inputNum2.Change(b);
         _addButton.Click();
-
+        
         // Assert
-        string actual = _result.GetAttribute("value");
-        Assert.Equal("1", actual);
+        Assert.Equal("Cannot Divide by Zero", _result.GetAttribute("value"));
     }
     
-    [Theory]
-    [InlineData(1)]
-    [InlineData(-1)]
-    [InlineData(1.5)]
-    [InlineData(-1.5)]
-    [InlineData(double.MaxValue)]
-    [InlineData(double.MaxValue * -1)]
-    public void RaisingRealNumbersExceptZeroToSignedZero_GivesOne(double a)
-    {
-
-        // Act
-        _inputNum1.Change(a.ToString(CultureInfo.CurrentCulture));
-        _inputNum2.Change("0");
-        _addButton.Click();
-
-        // Assert
-        string actual = _result.GetAttribute("value");
-        Assert.Equal("1", actual);
-        
-        // Act
-        // "-0" can be entered into second box so we need to test for it.
-        _inputNum2.Change("-0");
-        _addButton.Click();
-
-        // Assert
-        actual = _result.GetAttribute("value");
-        Assert.Equal("1", actual);
-    }
-
-    [Theory]
-    [InlineData(0.1)]
-    [InlineData(1)]
-    [InlineData(1.5)]
-    [InlineData(double.MaxValue)]
-    public void RaisingSignedZeroToPositiveRealNumbers_GivesZero(double a)
-    {
-
-        // Act
-        _inputNum1.Change("0");
-        _inputNum2.Change(a.ToString(CultureInfo.CurrentCulture));
-        _addButton.Click();
-
-        // Assert
-        string actualString = _result.GetAttribute("value");
-        Assert.Equal("0", actualString);
-        
-        // Act
-        // "-0" can be entered into first box so we need to test for it.
-        _inputNum1.Change("-0");
-        _addButton.Click();
-
-        // Assert
-        actualString = _result.GetAttribute("value");
-        
-        // Get rid of sign in front of zero
-        double actual = Math.Abs(double.Parse(actualString));
-        Assert.Equal(0, actual);
-    }
 }
