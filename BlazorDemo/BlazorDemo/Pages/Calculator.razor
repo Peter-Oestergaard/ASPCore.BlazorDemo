@@ -49,6 +49,9 @@
         <div class="col-md-2">
             <button @onclick="ModuloNumbers" class="btn btn-danger">Modulo (mod)</button>
         </div>
+        <div class="col-md-2">
+            <button @onclick="ANDNumbers" class="btn btn-warning">AND (&)</button>
+        </div>
     </div>
 </div>
 
@@ -108,4 +111,16 @@
         }
     }
 
+    void ANDNumbers()
+    {
+        try
+        {
+            finalresult = (Convert.ToInt64(num1) & Convert.ToInt64(num2)).ToString();
+        }
+        catch(FormatException)
+        {
+            finalresult = "Cannot AND non-integers";
+        }
+        
+    }
 }
