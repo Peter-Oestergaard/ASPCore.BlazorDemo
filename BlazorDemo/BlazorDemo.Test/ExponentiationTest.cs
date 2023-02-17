@@ -45,6 +45,26 @@ public sealed class ExponentiationTest : TestContext
     [InlineData(-1.5, -3.5)]
     [InlineData(1.5, 3.5)]
     [InlineData(1.5, -3.5)]
+    [InlineData(-1, double.MaxValue)]
+    [InlineData(-1, double.MaxValue * -1)]
+    [InlineData(1, double.MaxValue)]
+    [InlineData(1, double.MaxValue * -1)]
+    [InlineData(-1.5, double.MaxValue)]
+    [InlineData(-1.5, double.MaxValue * -1)]
+    [InlineData(1.5, double.MaxValue)]
+    [InlineData(1.5, double.MaxValue * -1)]
+    [InlineData(double.MaxValue, -1)]
+    [InlineData(double.MaxValue * -1, -1)]
+    [InlineData(double.MaxValue, 1)]
+    [InlineData(double.MaxValue * -1, 1)]
+    [InlineData(double.MaxValue, -1.5)]
+    [InlineData(double.MaxValue * -1, -1.5)]
+    [InlineData(double.MaxValue, 1.5)]
+    [InlineData(double.MaxValue * -1, 1.5)]
+    [InlineData(double.MaxValue, double.MaxValue)]
+    [InlineData(double.MaxValue * -1, double.MaxValue)]
+    [InlineData(double.MaxValue, double.MaxValue * -1)]
+    [InlineData(double.MaxValue * -1, double.MaxValue * -1)]
     public void RaisingRealNumbersExceptZero_GivesCorrectResult(double a, double b)
     {
         // Act
@@ -145,87 +165,33 @@ public sealed class ExponentiationTest : TestContext
         Assert.Equal("1", actual);
     }
 
-    [Fact]
-    public void DividingDoubleMaxWithDoubleMax_GivesOne()
-    {
-        double maxDouble = double.MaxValue;
-
-        // Act
-        _inputNum1.Change(maxDouble.ToString(CultureInfo.CurrentCulture));
-        _inputNum2.Change(maxDouble.ToString(CultureInfo.CurrentCulture));
-        _addButton.Click();
-
-        // Assert
-        double expected = 1;
-        Assert.Equal(expected.ToString(CultureInfo.CurrentCulture), _result.GetAttribute("value"));
-    }
-    
-    [Fact]
-    public void DividingNegativeDoubleMaxWithNegativeDoubleMax_GivesOne()
-    {
-        double negativeMaxDouble = double.MaxValue * -1;
-
-        // Act
-        _inputNum1.Change(negativeMaxDouble.ToString(CultureInfo.CurrentCulture));
-        _inputNum2.Change(negativeMaxDouble.ToString(CultureInfo.CurrentCulture));
-        _addButton.Click();
-
-        // Assert
-        double expected = 1;
-        Assert.Equal(expected.ToString(CultureInfo.CurrentCulture), _result.GetAttribute("value"));
-    }
-    
-    [Fact]
-    public void DividingDoubleMaxWithNegativeDoubleMax_GivesNegativeOne()
-    {
-        double maxDouble = double.MaxValue;
-        double negativeMaxDouble = double.MaxValue * -1;
-
-        // Act
-        _inputNum1.Change(maxDouble.ToString(CultureInfo.CurrentCulture));
-        _inputNum2.Change(negativeMaxDouble.ToString(CultureInfo.CurrentCulture));
-        _addButton.Click();
-
-        // Assert
-        double expected = -1;
-        Assert.Equal(expected.ToString(CultureInfo.CurrentCulture), _result.GetAttribute("value"));
-    }
-    
     [Theory]
+    [InlineData(0.1)]
     [InlineData(1)]
-    [InlineData(-1)]
     [InlineData(1.5)]
-    [InlineData(-1.5)]
-    [InlineData(0)]
     [InlineData(double.MaxValue)]
-    public void DividingRealNumbersWithZero_GivesError(double a)
+    public void RaisingSignedZeroToPositiveRealNumbers_GivesZero(double a)
     {
+
         // Act
-        _inputNum1.Change(a.ToString(CultureInfo.CurrentCulture));
-        _inputNum2.Change("0");
+        _inputNum1.Change("0");
+        _inputNum2.Change(a.ToString(CultureInfo.CurrentCulture));
         _addButton.Click();
 
         // Assert
-        string expected = "Cannot Divide by Zero";
-        Assert.Equal(expected, _result.GetAttribute("value"));
-    }
-    
-    [Theory]
-    [InlineData(1)]
-    [InlineData(-1)]
-    [InlineData(1.5)]
-    [InlineData(-1.5)]
-    [InlineData(0)]
-    [InlineData(double.MaxValue)]
-    public void DividingRealNumbersWithNegativeZero_GivesError(double a)
-    {
+        string actualString = _result.GetAttribute("value");
+        Assert.Equal("0", actualString);
+        
         // Act
-        _inputNum1.Change(a.ToString(CultureInfo.CurrentCulture));
-        _inputNum2.Change("-0");
+        // "-0" can be entered into first box so we need to test for it.
+        _inputNum1.Change("-0");
         _addButton.Click();
 
         // Assert
-        string expected = "Cannot Divide by Zero";
-        Assert.Equal(expected, _result.GetAttribute("value"));
+        actualString = _result.GetAttribute("value");
+        
+        // Get rid of sign in front of zero
+        double actual = Math.Abs(double.Parse(actualString));
+        Assert.Equal(0, actual);
     }
 }
