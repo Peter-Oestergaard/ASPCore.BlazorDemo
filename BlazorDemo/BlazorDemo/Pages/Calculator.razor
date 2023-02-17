@@ -1,35 +1,35 @@
 ﻿@page "/calculator"
 
 <h1>Basic Calculator Demo Using Blazor</h1>
-<hr />
+<hr/>
 <div>
     <div class="row">
         <div class="col-md-3">
             <p>First Number</p>
         </div>
         <div class="col-md-4">
-            <input placeholder="Enter First Number" @bind="@num1" />
+            <input placeholder="Enter First Number" @bind="@num1"/>
         </div>
     </div>
-    <br />
+    <br/>
     <div class="row">
         <div class="col-md-3">
             <p>Second Number</p>
         </div>
         <div class="col-md-4">
-            <input placeholder="Enter Second Number" @bind="@num2" />
+            <input placeholder="Enter Second Number" @bind="@num2"/>
         </div>
     </div>
-    <br />
+    <br/>
     <div class="row">
         <div class="col-md-3">
             <p>Result</p>
         </div>
         <div class="col-md-4">
-            <input readonly @bind="@finalresult" />
+            <input readonly @bind="@finalresult"/>
         </div>
     </div>
-    <br />
+    <br/>
     <div class="row">
         <div class="col-md-2">
             <button @onclick="AddNumbers" class="btn btn-light">Add (+)</button>
@@ -53,18 +53,22 @@
     string num1;
     string num2;
     string finalresult;
+
     void AddNumbers()
     {
         finalresult = (Convert.ToDouble(num1) + Convert.ToDouble(num2)).ToString();
     }
+
     void SubtractNumbers()
     {
         finalresult = (Convert.ToDouble(num1) - Convert.ToDouble(num2)).ToString();
     }
+
     void MultiplyNumbers()
     {
         finalresult = (Convert.ToDouble(num1) * Convert.ToDouble(num2)).ToString();
     }
+
     void DivideNumbers()
     {
         if (Convert.ToDouble(num2) != 0)
@@ -76,8 +80,17 @@
             finalresult = "Cannot Divide by Zero";
         }
     }
+
     void RaiseNumbers()
     {
-        finalresult = Math.Pow(Convert.ToDouble(num1), Convert.ToDouble(num2)).ToString();
+        if (Convert.ToDouble(num1) == 0 && Convert.ToDouble(num2) < 0)
+        {
+            finalresult = "Cannot raise zero to negative exponent";
+        }
+        else
+        {
+            finalresult = Math.Pow(Convert.ToDouble(num1), Convert.ToDouble(num2)).ToString();
+        }
     }
+
 }

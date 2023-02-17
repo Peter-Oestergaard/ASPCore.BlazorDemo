@@ -29,13 +29,23 @@ public sealed class ExponentiationTest : TestContext
     }
 
     [Theory]
-    [InlineData(0, 1)]
-    [InlineData(1, 1)]
-    [InlineData(1, -1)]
-    [InlineData(4, 1)]
-    [InlineData(4, 2)]
-    [InlineData(4, 8)]
-    public void RaisingTwoRealNumbers_GivesCorrectResult(double a, double b)
+    [InlineData(-1, 2)]
+    [InlineData(-1, -2)]
+    [InlineData(1, 2)]
+    [InlineData(1, -2)]
+    [InlineData(-1.5, 2)]
+    [InlineData(-1.5, -2)]
+    [InlineData(1.5, 2)]
+    [InlineData(1.5, -2)]
+    [InlineData(-1, 2.5)]
+    [InlineData(-1, -2.5)]
+    [InlineData(1, 2.5)]
+    [InlineData(1, -2.5)]
+    [InlineData(-1.5, 3.5)]
+    [InlineData(-1.5, -3.5)]
+    [InlineData(1.5, 3.5)]
+    [InlineData(1.5, -3.5)]
+    public void RaisingRealNumbersExceptZero_GivesCorrectResult(double a, double b)
     {
         // Act
         _inputNum1.Change(a.ToString(CultureInfo.CurrentCulture));
@@ -48,10 +58,10 @@ public sealed class ExponentiationTest : TestContext
 
     [Theory]
     [InlineData("-0", "-1")]
-    [InlineData("-0", "1")]
+    [InlineData("0", "-1")]
     [InlineData("-0", "-1,5")] // Decimal comma!
-    [InlineData("-0", "1,5")]  // Decimal comma!
-    public void DividingNegativeZeroWithRealNumbers_GivesZero(string a, string b)
+    [InlineData("0", "-1,5")]  // Decimal comma!
+    public void RaisingSignedZeroToNegativeRealNumbers_GivesError(string a, string b)
     {
         // "-0" can be entered into first box so we need to test for it.
 
@@ -61,34 +71,78 @@ public sealed class ExponentiationTest : TestContext
         _addButton.Click();
 
         // Assert
-        Assert.True(double.TryParse(a, out double ad));
-        Assert.True(double.TryParse(b, out double bd));
-        Assert.True(double.TryParse(_result.GetAttribute("value"), out double resultAsDouble));
-        
-        // Because of some magic and IEEE 754 some values results in negative zero. Negative zero and zero should be
-        // indistinguishable from each other so we Math.Abs() it away to have our test succeed.
-        string actual = Math.Abs(resultAsDouble).ToString(CultureInfo.CurrentCulture);
-        Assert.Equal("0", actual);
+        string actual = _result.GetAttribute("value");
+        Assert.Equal("Cannot raise zero to negative exponent", actual);
     }
-
-    [Theory]
-    [InlineData(2, 1)]
-    [InlineData(0, 0.1)]
-    [InlineData(1, 0.5)]
-    [InlineData(-1, -1.5)]
-    public void DividingRealNumbersWithRealNumbersExceptZero_GivesCorrectResult(int a, double b)
+    
+    [Fact]
+    public void RaisingSignedZeroToNegativeMaxDouble_GivesError()
     {
-        // Arrange
-        string expected = (a / b).ToString(CultureInfo.CurrentCulture);
-
         // Act
-        _inputNum1.Change(a.ToString());
-        _inputNum2.Change(b.ToString(CultureInfo.CurrentCulture));
+        _inputNum1.Change("0");
+        _inputNum2.Change((double.MaxValue * -1).ToString(CultureInfo.CurrentCulture));
         _addButton.Click();
 
         // Assert
-        string result = _result.GetAttribute("value");
-        Assert.Equal(expected, result);
+        string actual = _result.GetAttribute("value");
+        Assert.Equal("Cannot raise zero to negative exponent", actual);
+        
+        // "-0" can be entered into first box so we need to test for it.
+        // Act
+        _inputNum1.Change("-0");
+        _addButton.Click();
+
+        // Assert
+        actual = _result.GetAttribute("value");
+        Assert.Equal("Cannot raise zero to negative exponent", actual);
+    }
+    
+    [Theory]
+    [InlineData("0", "0")]
+    [InlineData("0", "-0")]
+    [InlineData("-0", "0")]
+    [InlineData("-0", "-0")]
+    public void RaisingSignedZeroToSignedZero_GivesOne(string a, string b)
+    {
+        // "-0" can be entered into either box so we need to test for it.
+
+        // Act
+        _inputNum1.Change(a);
+        _inputNum2.Change(b);
+        _addButton.Click();
+
+        // Assert
+        string actual = _result.GetAttribute("value");
+        Assert.Equal("1", actual);
+    }
+    
+    [Theory]
+    [InlineData(1)]
+    [InlineData(-1)]
+    [InlineData(1.5)]
+    [InlineData(-1.5)]
+    [InlineData(double.MaxValue)]
+    [InlineData(double.MaxValue * -1)]
+    public void RaisingRealNumbersExceptZeroToSignedZero_GivesOne(double a)
+    {
+
+        // Act
+        _inputNum1.Change(a.ToString(CultureInfo.CurrentCulture));
+        _inputNum2.Change("0");
+        _addButton.Click();
+
+        // Assert
+        string actual = _result.GetAttribute("value");
+        Assert.Equal("1", actual);
+        
+        // Act
+        // "-0" can be entered into second box so we need to test for it.
+        _inputNum2.Change("-0");
+        _addButton.Click();
+
+        // Assert
+        actual = _result.GetAttribute("value");
+        Assert.Equal("1", actual);
     }
 
     [Fact]
