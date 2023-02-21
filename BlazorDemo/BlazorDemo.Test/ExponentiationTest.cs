@@ -29,42 +29,7 @@ public sealed class ExponentiationTest : TestContext
     }
 
     [Theory]
-    [InlineData(-1, 2)]
-    [InlineData(-1, -2)]
-    [InlineData(1, 2)]
-    [InlineData(1, -2)]
-    [InlineData(-1.5, 2)]
-    [InlineData(-1.5, -2)]
-    [InlineData(1.5, 2)]
-    [InlineData(1.5, -2)]
-    [InlineData(-1, 2.5)]
-    [InlineData(-1, -2.5)]
-    [InlineData(1, 2.5)]
-    [InlineData(1, -2.5)]
-    [InlineData(-1.5, 3.5)]
-    [InlineData(-1.5, -3.5)]
-    [InlineData(1.5, 3.5)]
-    [InlineData(1.5, -3.5)]
-    [InlineData(-1, double.MaxValue)]
-    [InlineData(-1, double.MaxValue * -1)]
-    [InlineData(1, double.MaxValue)]
-    [InlineData(1, double.MaxValue * -1)]
-    [InlineData(-1.5, double.MaxValue)]
-    [InlineData(-1.5, double.MaxValue * -1)]
-    [InlineData(1.5, double.MaxValue)]
-    [InlineData(1.5, double.MaxValue * -1)]
-    [InlineData(double.MaxValue, -1)]
-    [InlineData(double.MaxValue * -1, -1)]
-    [InlineData(double.MaxValue, 1)]
-    [InlineData(double.MaxValue * -1, 1)]
-    [InlineData(double.MaxValue, -1.5)]
-    [InlineData(double.MaxValue * -1, -1.5)]
-    [InlineData(double.MaxValue, 1.5)]
-    [InlineData(double.MaxValue * -1, 1.5)]
-    [InlineData(double.MaxValue, double.MaxValue)]
-    [InlineData(double.MaxValue * -1, double.MaxValue)]
-    [InlineData(double.MaxValue, double.MaxValue * -1)]
-    [InlineData(double.MaxValue * -1, double.MaxValue * -1)]
+    [ClassData(typeof(ExponentiationTestData))]
     public void RaisingRealNumbersExceptZero_GivesCorrectResult(double a, double b)
     {
         // Act
@@ -76,11 +41,17 @@ public sealed class ExponentiationTest : TestContext
         Assert.Equal(Math.Pow(a, b).ToString(CultureInfo.CurrentCulture), _result.GetAttribute("value"));
     }
 
+    public static IEnumerable<object[]> ExponentiationZerosTestData =>
+        new List<object[]>
+        {
+            new object[] {"-0", "-1"},
+            new object[] {"0", "-1"},
+            new object[] {"-0", "-1,5"}, // Decimal comma!
+            new object[] {"0", "-1,5"} // Decimal comma!
+        };
+
     [Theory]
-    [InlineData("-0", "-1")]
-    [InlineData("0", "-1")]
-    [InlineData("-0", "-1,5")] // Decimal comma!
-    [InlineData("0", "-1,5")]  // Decimal comma!
+    [MemberData(nameof(ExponentiationZerosTestData))]
     public void RaisingSignedZeroToNegativeRealNumbers_GivesError(string a, string b)
     {
         // "-0" can be entered into first box so we need to test for it.
@@ -94,7 +65,7 @@ public sealed class ExponentiationTest : TestContext
         string actual = _result.GetAttribute("value");
         Assert.Equal("Cannot raise zero to negative exponent", actual);
     }
-    
+
     [Fact]
     public void RaisingSignedZeroToNegativeMaxDouble_GivesError()
     {
@@ -106,7 +77,7 @@ public sealed class ExponentiationTest : TestContext
         // Assert
         string actual = _result.GetAttribute("value");
         Assert.Equal("Cannot raise zero to negative exponent", actual);
-        
+
         // "-0" can be entered into first box so we need to test for it.
         // Act
         _inputNum1.Change("-0");
@@ -116,7 +87,7 @@ public sealed class ExponentiationTest : TestContext
         actual = _result.GetAttribute("value");
         Assert.Equal("Cannot raise zero to negative exponent", actual);
     }
-    
+
     [Theory]
     [InlineData("0", "0")]
     [InlineData("0", "-0")]
@@ -135,7 +106,7 @@ public sealed class ExponentiationTest : TestContext
         string actual = _result.GetAttribute("value");
         Assert.Equal("1", actual);
     }
-    
+
     [Theory]
     [InlineData(1)]
     [InlineData(-1)]
@@ -145,7 +116,6 @@ public sealed class ExponentiationTest : TestContext
     [InlineData(double.MaxValue * -1)]
     public void RaisingRealNumbersExceptZeroToSignedZero_GivesOne(double a)
     {
-
         // Act
         _inputNum1.Change(a.ToString(CultureInfo.CurrentCulture));
         _inputNum2.Change("0");
@@ -154,7 +124,7 @@ public sealed class ExponentiationTest : TestContext
         // Assert
         string actual = _result.GetAttribute("value");
         Assert.Equal("1", actual);
-        
+
         // Act
         // "-0" can be entered into second box so we need to test for it.
         _inputNum2.Change("-0");
@@ -172,7 +142,6 @@ public sealed class ExponentiationTest : TestContext
     [InlineData(double.MaxValue)]
     public void RaisingSignedZeroToPositiveRealNumbers_GivesZero(double a)
     {
-
         // Act
         _inputNum1.Change("0");
         _inputNum2.Change(a.ToString(CultureInfo.CurrentCulture));
@@ -181,7 +150,7 @@ public sealed class ExponentiationTest : TestContext
         // Assert
         string actualString = _result.GetAttribute("value");
         Assert.Equal("0", actualString);
-        
+
         // Act
         // "-0" can be entered into first box so we need to test for it.
         _inputNum1.Change("-0");
@@ -189,7 +158,7 @@ public sealed class ExponentiationTest : TestContext
 
         // Assert
         actualString = _result.GetAttribute("value");
-        
+
         // Get rid of sign in front of zero
         double actual = Math.Abs(double.Parse(actualString));
         Assert.Equal(0, actual);
